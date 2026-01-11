@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kadant India CRM | Enterprise</title>
+    <title>Kadant India CRM | Production</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: radial-gradient(circle at top right, #0f172a, #000000); min-height: 100vh; color: #f8fafc; }
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
-        .btn-cyan { background: linear-gradient(to r, #0891b2, #0e7490); transition: all 0.3s; }
-        .btn-cyan:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); }
+        .btn-cyan { background: linear-gradient(to r, #0891b2, #0e7490); }
+        .animate-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -23,34 +24,43 @@
         const { useState, useEffect, useMemo } = React;
 
         function App() {
-            const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
+            const [user, setUser] = useState(JSON.parse(localStorage.getItem('current_user')) || null);
             const [view, setView] = useState('dashboard');
-            const [customers, setCustomers] = useState(JSON.parse(localStorage.getItem('customers')) || []);
-            const [visits, setVisits] = useState(JSON.parse(localStorage.getItem('visits')) || []);
+            
+            // Storage Keys unique to user
+            const custKey = user ? `customers:${user.email}` : null;
+            const visitKey = user ? `visits:${user.email}` : null;
 
-            // Sync with LocalStorage
+            const [customers, setCustomers] = useState(JSON.parse(localStorage.getItem(custKey)) || []);
+            const [visits, setVisits] = useState(JSON.parse(localStorage.getItem(visitKey)) || []);
+
             useEffect(() => {
-                localStorage.setItem('customers', JSON.stringify(customers));
-                localStorage.setItem('visits', JSON.stringify(visits));
-            }, [customers, visits]);
+                if(user) {
+                    localStorage.setItem(`customers:${user.email}`, JSON.stringify(customers));
+                    localStorage.setItem(`visits:${user.email}`, JSON.stringify(visits));
+                }
+            }, [customers, visits, user]);
 
-            if (!user) return <Login onLogin={(u) => { setUser(u); localStorage.setItem('user', JSON.stringify(u)); }} />;
+            if (!user) return <Login onLogin={(u) => { setUser(u); localStorage.setItem('current_user', JSON.stringify(u)); }} />;
 
             return (
-                <div className="min-h-screen flex flex-col">
+                <div className="min-h-screen flex flex-col font-sans">
                     <nav className="glass border-b border-slate-800 p-4 sticky top-0 z-50">
                         <div className="container mx-auto flex justify-between items-center">
-                            <h1 className="text-cyan-400 font-black uppercase tracking-tighter text-xl">Kadant CRM</h1>
-                            <div className="flex gap-6 text-xs font-bold uppercase">
-                                <button onClick={() => setView('dashboard')} className={view === 'dashboard' ? 'text-cyan-400' : 'text-slate-500'}>Dashboard</button>
-                                <button onClick={() => setView('customers')} className={view === 'customers' ? 'text-cyan-400' : 'text-slate-500'}>Customers</button>
-                                <button onClick={() => setView('visits')} className={view === 'visits' ? 'text-cyan-400' : 'text-slate-500'}>Visits</button>
-                                <button onClick={() => { setUser(null); localStorage.removeItem('user'); }} className="text-red-500">Logout</button>
+                            <div>
+                                <h1 className="text-cyan-400 font-black uppercase tracking-tighter text-xl">Kadant CRM</h1>
+                                <p className="text-[10px] text-slate-500 uppercase tracking-widest">Service Division India</p>
+                            </div>
+                            <div className="flex gap-8 text-xs font-bold uppercase tracking-widest">
+                                <button onClick={() => setView('dashboard')} className={view === 'dashboard' ? 'text-cyan-400' : 'text-slate-500 hover:text-white'}>Dashboard</button>
+                                <button onClick={() => setView('customers')} className={view === 'customers' ? 'text-cyan-400' : 'text-slate-500 hover:text-white'}>Customers</button>
+                                <button onClick={() => setView('visits')} className={view === 'visits' ? 'text-cyan-400' : 'text-slate-500 hover:text-white'}>Visits</button>
+                                <button onClick={() => { setUser(null); localStorage.removeItem('current_user'); }} className="text-red-500">Logout</button>
                             </div>
                         </div>
                     </nav>
 
-                    <main className="container mx-auto p-6">
+                    <main className="container mx-auto p-6 flex-1">
                         {view === 'dashboard' && <Dashboard customers={customers} visits={visits} />}
                         {view === 'customers' && <CustomerView customers={customers} setCustomers={setCustomers} />}
                         {view === 'visits' && <VisitView visits={visits} setVisits={setVisits} customers={customers} />}
@@ -63,11 +73,14 @@
             const [email, setEmail] = useState('');
             return (
                 <div className="h-screen flex items-center justify-center p-4">
-                    <div className="glass p-10 rounded-3xl w-full max-w-md text-center border-cyan-500/30">
-                        <h2 className="text-3xl font-black text-white mb-2">Welcome Back</h2>
-                        <p className="text-slate-500 mb-8">Enter your email to access Kadant CRM</p>
-                        <input type="email" placeholder="email@kadant.com" className="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl mb-4" onChange={e => setEmail(e.target.value)} />
-                        <button onClick={() => onLogin(email)} className="w-full btn-cyan p-4 rounded-xl font-bold text-white uppercase">Enter System</button>
+                    <div className="glass p-10 rounded-3xl w-full max-w-md text-center border-cyan-500/30 shadow-2xl">
+                        <div className="w-20 h-20 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span className="text-4xl">🏭</span>
+                        </div>
+                        <h2 className="text-3xl font-black text-white mb-2">Service Portal</h2>
+                        <p className="text-slate-500 mb-8 text-sm">Enter your Kadant email to begin</p>
+                        <input type="email" placeholder="name@kadant.com" className="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl mb-4 text-white outline-none focus:border-cyan-500" onChange={e => setEmail(e.target.value)} />
+                        <button onClick={() => email && onLogin({email})} className="w-full btn-cyan p-4 rounded-xl font-bold text-white uppercase tracking-widest">Sign In</button>
                     </div>
                 </div>
             );
@@ -75,73 +88,96 @@
 
         function Dashboard({ customers, visits }) {
             const stats = useMemo(() => {
-                const totalValue = visits.reduce((acc, v) => acc + (Number(v.value) || 0), 0);
-                const won = visits.filter(v => v.status === 'Won').length;
-                return { totalValue, won, total: visits.length };
-            }, [visits]);
+                const totalVal = visits.reduce((acc, v) => acc + (parseFloat(v.value) || 0), 0);
+                const planned = visits.filter(v => v.status === 'Planned').length;
+                const visited = visits.filter(v => v.status === 'Visited').length;
+                return { totalVal, planned, visited, clients: customers.length };
+            }, [visits, customers]);
 
             return (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fadeIn">
-                    <div className="glass p-8 rounded-3xl">
-                        <p className="text-slate-500 text-xs font-bold uppercase mb-2">Pipeline Value</p>
-                        <p className="text-4xl font-black text-emerald-400">€{stats.totalValue.toLocaleString()}</p>
-                    </div>
-                    <div className="glass p-8 rounded-3xl">
-                        <p className="text-slate-500 text-xs font-bold uppercase mb-2">Win Rate</p>
-                        <p className="text-4xl font-black text-cyan-400">{stats.total > 0 ? ((stats.won / stats.total) * 100).toFixed(0) : 0}%</p>
-                    </div>
-                    <div className="glass p-8 rounded-3xl">
-                        <p className="text-slate-500 text-xs font-bold uppercase mb-2">Client Base</p>
-                        <p className="text-4xl font-black text-white">{customers.length}</p>
+                <div className="space-y-8 animate-in">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <StatCard label="Pipeline Value" val={`€${stats.totalVal.toLocaleString()}`} color="text-emerald-400" />
+                        <StatCard label="Planned Visits" val={stats.planned} color="text-cyan-400" />
+                        <StatCard label="Visits Done" val={stats.visited} color="text-yellow-400" />
+                        <StatCard label="Client Base" val={stats.clients} color="text-white" />
                     </div>
                 </div>
             );
         }
 
-        function CustomerView({ customers, setCustomers }) {
-            const [name, setName] = useState('');
-            const add = () => { if(name) { setCustomers([...customers, { id: Date.now(), name }]); setName(''); } };
+        function StatCard({ label, val, color }) {
             return (
-                <div className="space-y-6">
-                    <div className="flex gap-2">
-                        <input value={name} onChange={e => setName(e.target.value)} placeholder="New Company Name" className="flex-1 bg-slate-900 border border-slate-700 p-4 rounded-xl" />
-                        <button onClick={add} className="btn-cyan px-8 rounded-xl font-bold">Add</button>
+                <div className="glass p-6 rounded-2xl border-slate-800">
+                    <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">{label}</p>
+                    <p className={`text-3xl font-black ${color}`}>{val}</p>
+                </div>
+            );
+        }
+
+        function CustomerView({ customers, setCustomers }) {
+            const [form, setForm] = useState({ name: '', code: '', country: 'India' });
+            const add = () => {
+                if(!form.name || !form.code) return alert("Fill Name and Customer Code");
+                setCustomers([...customers, { ...form, id: Date.now() }]);
+                setForm({ name: '', code: '', country: 'India' });
+            };
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in">
+                    <div className="glass p-6 rounded-3xl h-fit space-y-4">
+                        <h3 className="font-bold text-lg text-cyan-400">Add New Customer</h3>
+                        <input placeholder="Company Name" className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                        <input placeholder="Customer Code (e.g. KAD-01)" className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700" value={form.code} onChange={e => setForm({...form, code: e.target.value.toUpperCase()})} />
+                        <select className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700" value={form.country} onChange={e => setForm({...form, country: e.target.value})}>
+                            <option>India</option><option>Thailand</option><option>Saudi Arabia</option><option>Vietnam</option>
+                        </select>
+                        <button onClick={add} className="w-full btn-cyan p-3 rounded-xl font-bold uppercase">Register Customer</button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {customers.map(c => <div key={c.id} className="glass p-4 rounded-xl flex justify-between"><span>{c.name}</span> <button onClick={() => setCustomers(customers.filter(x => x.id !== c.id))} className="text-red-500 text-xs">Delete</button></div>)}
+                    <div className="lg:col-span-2 space-y-3">
+                        {customers.map(c => (
+                            <div key={c.id} className="glass p-4 rounded-xl flex justify-between items-center group">
+                                <div>
+                                    <h4 className="font-bold text-white group-hover:text-cyan-400">{c.name}</h4>
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-tighter">{c.code} | {c.country}</p>
+                                </div>
+                                <button onClick={() => setCustomers(customers.filter(x => x.id !== c.id))} className="text-slate-600 hover:text-red-500">✕</button>
+                            </div>
+                        ))}
                     </div>
                 </div>
             );
         }
 
         function VisitView({ visits, setVisits, customers }) {
-            const [form, setForm] = useState({ company: '', value: '', status: 'Planned' });
-            const save = () => { setVisits([...visits, { ...form, id: Date.now() }]); };
+            const [form, setForm] = useState({ company: '', value: '', type: 'Process Audit', status: 'Planned' });
+            const save = () => {
+                if(!form.company) return alert("Select a Customer");
+                setVisits([...visits, { ...form, id: Date.now(), date: new Date().toLocaleDateString() }]);
+            };
             return (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in">
                     <div className="glass p-6 rounded-3xl h-fit space-y-4">
-                        <h3 className="font-bold text-lg">Schedule Visit</h3>
-                        <select className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700 text-slate-300" onChange={e => setForm({...form, company: e.target.value})}>
+                        <h3 className="font-bold text-lg text-cyan-400">Schedule Audit/Visit</h3>
+                        <select className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700" onChange={e => setForm({...form, company: e.target.value})}>
                             <option>Select Customer</option>
-                            {customers.map(c => <option key={c.id}>{c.name}</option>)}
+                            {customers.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </select>
-                        <input type="number" placeholder="Opp. Value €" className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700" onChange={e => setForm({...form, value: e.target.value})} />
-                        <select className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700 text-slate-300" onChange={e => setForm({...form, status: e.target.value})}>
-                            <option value="Planned">Planned</option>
-                            <option value="Visited">Visited</option>
-                            <option value="Won">Won</option>
+                        <select className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700" onChange={e => setForm({...form, type: e.target.value})}>
+                            <option>Process Audit</option><option>Mechanical Audit</option><option>Sales Meeting</option>
                         </select>
-                        <button onClick={save} className="w-full btn-cyan p-3 rounded-xl font-bold">Save Visit</button>
+                        <input type="number" placeholder="Opportunity Value €" className="w-full bg-slate-900 p-3 rounded-xl border border-slate-700" onChange={e => setForm({...form, value: e.target.value})} />
+                        <button onClick={save} className="w-full btn-cyan p-3 rounded-xl font-bold uppercase text-sm">Save to Schedule</button>
                     </div>
                     <div className="lg:col-span-2 space-y-4">
                         {visits.map(v => (
                             <div key={v.id} className="glass p-5 rounded-2xl flex justify-between items-center border-l-4 border-cyan-500">
                                 <div>
                                     <h4 className="font-bold text-white">{v.company}</h4>
-                                    <p className="text-xs text-slate-500 uppercase tracking-widest">{v.status}</p>
+                                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">{v.type} • {v.date}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-emerald-400 font-black">€{Number(v.value).toLocaleString()}</p>
+                                    <span className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400 uppercase">{v.status}</span>
                                 </div>
                             </div>
                         ))}
