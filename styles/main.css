@@ -1,0 +1,33 @@
+/* Custom Styles for Kadant CRM */
+:root {
+    --glass-bg: rgba(15, 23, 42, 0.8);
+    --glass-border: rgba(51, 65, 85, 0.5);
+    --accent: #22d3ee; /* Cyan 400 */
+}
+
+body {
+    background: radial-gradient(circle at top right, #0f172a, #000000);
+    min-height: 100vh;
+}
+
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom scrollbar for that enterprise feel */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0f172a; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
