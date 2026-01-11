@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "Kadant India Service CRM",
+    "version": "2.0.0-Cloud"
+  },
+  "countries": ["India", "Saudi Arabia", "Thailand", "Vietnam", "Egypt", "Indonesia"],
+  "classifications": ["A - Major", "B - Regular", "C - Potential", "D - Dormant", "E - New"],
+  "visitPlans": ["Process Audit", "Mechanical Audit", "Sales Meeting", "Proposal", "Installation"],
+  "statuses": ["Planned", "Visited", "Follow-up", "Won", "Lost", "On Hold"]
+}
